@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Jeremy Carroll]]></title>
+  <title><![CDATA[CarrollOps]]></title>
   <link href="http://www.carrollops.com/atom.xml" rel="self"/>
   <link href="http://www.carrollops.com/"/>
-  <updated>2012-08-06T13:10:59-07:00</updated>
+  <updated>2012-08-06T13:17:50-07:00</updated>
   <id>http://www.carrollops.com/</id>
   <author>
     <name><![CDATA[Jeremy Carroll]]></name>
