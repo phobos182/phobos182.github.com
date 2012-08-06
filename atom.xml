@@ -1,16 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[My Octopress Blog]]></title>
-  <link href="http://yoursite.com/atom.xml" rel="self"/>
-  <link href="http://yoursite.com/"/>
-  <updated>2012-08-06T11:33:18-07:00</updated>
-  <id>http://yoursite.com/</id>
+  <title><![CDATA[Jeremy Carroll]]></title>
+  <link href="http://phobos182.github.com/atom.xml" rel="self"/>
+  <link href="http://phobos182.github.com/"/>
+  <updated>2012-08-06T12:50:57-07:00</updated>
+  <id>http://phobos182.github.com/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
-    
+    <name><![CDATA[Jeremy Carroll]]></name>
+    <email><![CDATA[phobos182 gmail.com]]></email>
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Open sourcing some work]]></title>
+    <link href="http://phobos182.github.com/blog/2012/08/06/open-sourcing-some-work/"/>
+    <updated>2012-08-06T12:37:00-07:00</updated>
+    <id>http://phobos182.github.com/blog/2012/08/06/open-sourcing-some-work</id>
+    <content type="html"><![CDATA[<p>I&#8217;ve made it a point to start contributing more of my work back to the open source community i&#8217;ve gained so much from. So in next few days with permission from my employer, I am going to start contributing some simple tools that have made my life easier over here at Klout. Here is a list of some of the things i&#8217;m working on.</p>
+
+<ul>
+<li>Storm Puppet module</li>
+<li>Storm debian packaging</li>
+<li>HBase rolling compact tool with ZooKeeper locks</li>
+<li>HBase major_compaction script with ZooKeeper locks</li>
+<li>HBase metrics collection script</li>
+<li>HBase per-table load balancing calculation script</li>
+<li>Hadoop GraphiteClient context</li>
+<li>Kafka JMX Monitoring script</li>
+<li>Diamond handler for Kafka</li>
+<li>OpenTSDB GnuPlot options</li>
+<li>MCollective Monit agent</li>
+<li>Hadoop hiera puppet module</li>
+<li>HBase hiera puppet module</li>
+</ul>
+
+]]></content>
+  </entry>
   
 </feed>
