@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Open sourcing some work - CarrollOps</title>
+  <title>Hadoop Fair Scheduler monitoring - CarrollOps</title>
   <meta name="author" content="Jeremy Carroll">
 
   
-  <meta name="description" content="I&#8217;ve made it a point to start contributing more of my work back to the open source community i&#8217;ve gained so much from. So in next few &hellip;">
+  <meta name="description" content="So today I received a request to help debug fair scheduler performance on one of our large Hadoop clusters. Normally this is the point where I would &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.carrollops.com/blog/2012/08/06/open-sourcing-some-work/">
+  <link rel="canonical" href="http://www.carrollops.com/blog/2012/08/07/hadoop-fair-scheduler-monitoring/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -88,7 +88,7 @@
   <header>
     
       
-        <h1 class="entry-title">Open Sourcing Some Work</h1>
+        <h1 class="entry-title">Hadoop Fair Scheduler Monitoring</h1>
       
     
     
@@ -105,31 +105,34 @@
   
 
 
-<time datetime="2012-08-06T12:37:00-07:00" pubdate data-updated="true">Aug 6<span>th</span>, 2012</time>
+<time datetime="2012-08-07T15:23:00-07:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>I&#8217;ve made it a point to start contributing more of my work back to the open source community i&#8217;ve gained so much from. So in next few days with permission from my employer, I am going to start contributing some simple tools that have made my life easier over here at Klout. Here is a list of some of the things i&#8217;m working on.</p>
+<div class="entry-content"><p>So today I received a request to help debug fair scheduler performance on one of our large Hadoop clusters. Normally this is the point where I would point to installing a tool like Cloudera Manager, but we do not have CM running anywhere within our environment. So I took a quick look around GitHub to see if anybody has written any scripts to monitor the fair scheduler allocations and found nothing. We currently have monitoring on the Hadoop / HDFS level, but are lacking visibility at the individual scheduler / pool level. Questions arise such as this that I cannot answer without a cool made-up story.</p>
 
 <ul>
-<li>Storm Puppet module</li>
-<li>Storm debian packaging</li>
-<li>HBase rolling compact tool with ZooKeeper locks</li>
-<li>HBase major_compaction script with ZooKeeper locks</li>
-<li>HBase metrics collection script</li>
-<li>HBase per-table load balancing calculation script</li>
-<li>Hadoop GraphiteClient context</li>
-<li>Kafka JMX Monitoring script</li>
-<li>Diamond handler for Kafka</li>
-<li>OpenTSDB GnuPlot options</li>
-<li>MCollective Monit agent</li>
-<li>Hadoop hiera puppet module</li>
-<li>HBase hiera puppet module</li>
+<li>My job ran very slow last night, can you take a look at the cluster to see if anything is wrong?</li>
+<li>This set of Oozie jobs normally takes 2 hours, but over the past few days it has been taking 4 hours easy run, why is that?</li>
+<li>Can you check the network? Looks like my jobs have been running very slowly.</li>
 </ul>
 
+
+<p>Now at this point, I check the regular cluster health with our fleet of monitoring tools based on Graphite / OpenTSDB. Looking at HDFS health, I see no instances of failed datanodes, 100 mbit links, errors in the log files, et al. While looking at basic hadoop-metrics from our logging context, I see that the cluster is almost always 100% utilized on map slots / reduce slots. The next obvious question is &#8216;Who is running jobs stealing my resources?&#8217;. Before I can start to create fair-share policies, and pick winners and losers of precious cluster resources via preemption I need to know demand. I need to know how many jobs are running in each pool, and how many slots they require to finish there tasks. I would also love to monitor preemption requests to see when pools start killing other tasks to meet their fair-share or min-share. I set out to create a simple tool to query the http://jobtracker:50030/scheduler?advanced web interface on a timer, and send this metadata to Graphite / OpenTSDB on a real-time basis. I could then create visualizations to see demand and allocation to help craft fair share policies. It&#8217;s not perfect as it does not look at individual job performance (Input splits, min / max task completion time) but is really helpful on a high level.</p>
+
+<p>I wanted something quick and easy to get done, so I took about 2 hours to create a Ruby Mechanize script to screen scrape the jobtracker fair-scheduler page. I then turn the output into a KeyValue format that I can use with OpenTSDB / Graphite. I did not want to create a lot of unique keys due to issues with Graphite creating a Whisper database per unique point. So capturing job-name, task-id is unacceptable. I instead aggregate metrics by user, or pool. In the case of our cluster job pool names are users. So I aggreagte the metrics by pool name, then send off to our visualiation system for further planning.</p>
+
+<ul>
+<li><a href="https://github.com/phobos182/hadoop-hbase-tools">https://github.com/phobos182/hadoop-hbase-tools</a></li>
+</ul>
+
+
+<p>I create a project above if you would like to hack on the code. Currently I am using Diamond <a href="https://github.com/BrightcoveOS/Diamond">https://github.com/BrightcoveOS/Diamond</a> to schedule checks via the UserScriptsCollector for ruby programs. It wants Key + Value, and fills in the date for you based on your scheduler. I can then send the metrics to both OpenTSDB + Graphite with the same system via Handlers. Below is some graphs of the things you can do with this information.</p>
+
+<p><img class="left" src="http://www.carrollops.com/graphite_fair_scheduler.png" width="351" height="140" title="'Fair scheduler' #2" ></p>
 </div>
 
 
@@ -152,7 +155,7 @@
   
 
 
-<time datetime="2012-08-06T12:37:00-07:00" pubdate data-updated="true">Aug 6<span>th</span>, 2012</time>
+<time datetime="2012-08-07T15:23:00-07:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time>
       
 
 
@@ -160,7 +163,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.carrollops.com/blog/2012/08/06/open-sourcing-some-work/" data-via="jeremy_carroll" data-counturl="http://www.carrollops.com/blog/2012/08/06/open-sourcing-some-work/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.carrollops.com/blog/2012/08/07/hadoop-fair-scheduler-monitoring/" data-via="jeremy_carroll" data-counturl="http://www.carrollops.com/blog/2012/08/07/hadoop-fair-scheduler-monitoring/" >Tweet</a>
   
   
   
@@ -169,8 +172,8 @@
     
     <p class="meta">
       
+        <a class="basic-alignment left" href="/blog/2012/08/06/open-sourcing-some-work/" title="Previous Post: Open sourcing some work">&laquo; Open sourcing some work</a>
       
-        <a class="basic-alignment right" href="/blog/2012/08/07/hadoop-fair-scheduler-monitoring/" title="Next Post: Hadoop Fair Scheduler monitoring">Hadoop Fair Scheduler monitoring &raquo;</a>
       
     </p>
   </footer>
@@ -241,8 +244,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://www.carrollops.com/blog/2012/08/06/open-sourcing-some-work/';
-        var disqus_url = 'http://www.carrollops.com/blog/2012/08/06/open-sourcing-some-work/';
+        var disqus_identifier = 'http://www.carrollops.com/blog/2012/08/07/hadoop-fair-scheduler-monitoring/';
+        var disqus_url = 'http://www.carrollops.com/blog/2012/08/07/hadoop-fair-scheduler-monitoring/';
         var disqus_script = 'embed.js';
       
     (function () {
