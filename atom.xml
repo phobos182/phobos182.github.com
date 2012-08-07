@@ -4,7 +4,7 @@
   <title><![CDATA[CarrollOps]]></title>
   <link href="http://www.carrollops.com/atom.xml" rel="self"/>
   <link href="http://www.carrollops.com/"/>
-  <updated>2012-08-07T16:05:51-07:00</updated>
+  <updated>2012-08-07T16:08:37-07:00</updated>
   <id>http://www.carrollops.com/</id>
   <author>
     <name><![CDATA[Jeremy Carroll]]></name>
@@ -38,7 +38,8 @@
 
 <p>I create a project above if you would like to hack on the code. Currently I am using Diamond <a href="https://github.com/BrightcoveOS/Diamond">https://github.com/BrightcoveOS/Diamond</a> to schedule checks via the UserScriptsCollector for ruby programs. It wants Key + Value, and fills in the date for you based on your scheduler. I can then send the metrics to both OpenTSDB + Graphite with the same system via Handlers. Below is some graphs of the things you can do with this information.</p>
 
-<p><img class="left" src="http://www.carrollops.com/images/graphite_fair_scheduler.png" width="351" height="140" title="'Fair scheduler' #2" ></p>
+<p><img class="left" src="http://www.carrollops.com/images/graphite_fair_scheduler.png" width="351" height="140" title="'Fair scheduler' #2" >
+As you can see by the graph, it details a nice break down of slots utilization by fair scheduler pool. In this image, 3 different pools are racing for resources as the cluster is 100% utilized. You can dive into other metrics such as total tasks scheduled (map / reduce) vs. resources available at that time. Let me know if you find this tool helpful. Pull requests are always welcome.</p>
 ]]></content>
   </entry>
   
