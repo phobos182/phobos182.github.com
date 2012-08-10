@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Hadoop Fair Scheduler monitoring - CarrollOps</title>
+  <title>Hadoop Fair Scheduler Monitoring - Part 2 - CarrollOps</title>
   <meta name="author" content="Jeremy Carroll">
 
   
-  <meta name="description" content="So today I received a request to help debug fair scheduler performance on one of our large Hadoop clusters. Normally this is the point where I would &hellip;">
+  <meta name="description" content="In my first blog post I went over setting up a simple fair scheduler monitoring script using mechanize to scrape stats from the JobTracker page. Now &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.carrollops.com/blog/2012/08/07/hadoop-fair-scheduler-monitoring/">
+  <link rel="canonical" href="http://www.carrollops.com/blog/2012/08/10/hadoop-fair-scheduler-monitoring-part-2/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -88,7 +88,7 @@
   <header>
     
       
-        <h1 class="entry-title">Hadoop Fair Scheduler Monitoring</h1>
+        <h1 class="entry-title">Hadoop Fair Scheduler Monitoring - Part 2</h1>
       
     
     
@@ -105,35 +105,44 @@
   
 
 
-<time datetime="2012-08-07T15:23:00-07:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time>
+<time datetime="2012-08-10T08:44:00-07:00" pubdate data-updated="true">Aug 10<span>th</span>, 2012</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>So today I received a request to help debug fair scheduler performance on one of our large Hadoop clusters. Normally this is the point where I would point to installing a tool like Cloudera Manager, but we do not have CM running anywhere within our environment. So I took a quick look around GitHub to see if anybody has written any scripts to monitor the fair scheduler allocations and found nothing. We currently have monitoring on the Hadoop / HDFS level, but are lacking visibility at the individual scheduler / pool level. Questions arise such as this that I cannot answer without a cool made-up story.</p>
+<div class="entry-content"><p>In my first blog post I went over setting up a simple fair scheduler monitoring script using mechanize to scrape stats from the JobTracker page. Now that all the metrics are in our graphite system (In this case, I used graphite due to nice front-end vis) I wanted to show how we can put these metrics to work.</p>
+
+<p>The goal was to measure requests for resources (Map slots / Reduce slots) for different job queues. I can then determine certain parts of the day where there is a lot of contention for resources to see if a job can be rescheduled to a different time when there is more slots available. Another option would be to change the fair-scheduler minShare, preemption, and weight settings to help shape the SLA of running jobs. Before we can start setting these policies it would be nice to know map / reduce slot demand over a timeline. Also look at &#8216;running&#8217; map / reduce slots to see what resources the scheduler gave during those time periods. Here are some questions the metrics can answer for us.</p>
 
 <ul>
-<li>My job ran very slow last night, can you take a look at the cluster to see if anything is wrong?</li>
-<li>This set of Oozie jobs normally takes 2 hours, but over the past few days it has been taking 4 hours easy run, why is that?</li>
-<li>Can you check the network? Looks like my jobs have been running very slowly.</li>
+<li>During what times of the day is the cluster heavily over-subscribed?
+
+<ul>
+<li>Is the cluster using more map or reduce slots during these timeframes?</li>
+</ul>
+</li>
+<li>What queues / users are requesting resources?
+
+<ul>
+<li>How many jobs are they running?</li>
+<li>How many Map / Reduce slots are they requesting?</li>
+<li>How fast are they completing map / reduce slots?</li>
+</ul>
+</li>
 </ul>
 
 
-<p>Now at this point, I check the regular cluster health with our fleet of monitoring tools based on Graphite / OpenTSDB. Looking at HDFS health, I see no instances of failed datanodes, 100 mbit links, errors in the log files, et al. While looking at basic hadoop-metrics from our logging context, I see that the cluster is almost always 100% utilized on map slots / reduce slots. The next obvious question is &#8216;Who is running jobs stealing my resources?&#8217;. Before I can start to create fair-share policies, and pick winners and losers of precious cluster resources via preemption I need to know demand. I need to know how many jobs are running in each pool, and how many slots they require to finish there tasks. I would also love to monitor preemption requests to see when pools start killing other tasks to meet their fair-share or min-share. I set out to create a simple tool to query the http://jobtracker:50030/scheduler?advanced web interface on a timer, and send this metadata to Graphite / OpenTSDB on a real-time basis. I could then create visualizations to see demand and allocation to help craft fair share policies. It&#8217;s not perfect as it does not look at individual job performance (Input splits, min / max task completion time) but is really helpful on a high level.</p>
+<p>I put together a series of visualizations to help debug an oversubscribed Hadoop cluster. Using this information was invaluable in determining winners and losers of cluster resources. It did not help debug individual MapReduce jobs. You would have to look at individual job performance such as spilling to disk, not using a combiner or secondary sort, or sending too much data uncompressed over the wire, etc&#8230; But it does help determine overall cluster utilization.</p>
 
-<p>I wanted something quick and easy to get done, so I took about 2 hours to create a Ruby Mechanize script to screen scrape the jobtracker fair-scheduler page. I then turn the output into a KeyValue format that I can use with OpenTSDB / Graphite. I did not want to create a lot of unique keys due to issues with Graphite creating a Whisper database per unique point. So capturing job-name, task-id is unacceptable. I instead aggregate metrics by user, or pool. In the case of our cluster job pool names are users. So I aggreagte the metrics by pool name, then send off to our visualiation system for further planning.</p>
-
-<ul>
-<li><a href="https://github.com/phobos182/hadoop-hbase-tools">https://github.com/phobos182/hadoop-hbase-tools</a></li>
-</ul>
-
-
-<p>I created a project above if you would like to hack on the code. Currently I am using Diamond <a href="https://github.com/BrightcoveOS/Diamond">https://github.com/BrightcoveOS/Diamond</a> to schedule checks via the UserScriptsCollector for ruby programs. It wants Key + Value, and fills in the date for you based on your scheduler. I can then send the metrics to both OpenTSDB + Graphite with the same system via Handlers. Below is some graphs of the things you can do with this information.</p>
-
-<p><img class="left" src="http://www.carrollops.com/images/graphite_fair_scheduler.png" width="351" height="140" title="'Fair scheduler' #2" >
-As you can see by the graph, it details a nice break down of slots utilization by fair scheduler pool. In this image, 3 different pools are racing for resources as the cluster is 100% utilized. You can dive into other metrics such as total tasks scheduled (map / reduce) vs. resources available at that time. Let me know if you find this tool helpful. Pull requests are always welcome.</p>
+<p><img class="left" src="http://www.carrollops.com/images/fair_sched_2_demand.png" width="351" height="140" title="'Demand' #2" >
+<img class="left" src="http://www.carrollops.com/images/fair_sched_2_jobs.png" width="351" height="140" title="'Jobs' #2" >
+<img class="left" src="http://www.carrollops.com/images/fair_sched_2_map_slots.png" width="351" height="140" title="'Map Slots' #2" >
+<img class="left" src="http://www.carrollops.com/images/fair_sched_2_maps_speed.png" width="351" height="140" title="'Map Speed' #2" >
+<img class="left" src="http://www.carrollops.com/images/fair_sched_2_queue.png" width="351" height="140" title="'Queue' #2" >
+<img class="left" src="http://www.carrollops.com/images/fair_sched_2_reduce_slots.png" width="351" height="140" title="'Reduce Slots' #2" >
+<img class="left" src="http://www.carrollops.com/images/fair_sched_2_queue_info.png" width="351" height="140" title="'Queue Info' #2" ></p>
 </div>
 
 
@@ -156,7 +165,7 @@ As you can see by the graph, it details a nice break down of slots utilization b
   
 
 
-<time datetime="2012-08-07T15:23:00-07:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time>
+<time datetime="2012-08-10T08:44:00-07:00" pubdate data-updated="true">Aug 10<span>th</span>, 2012</time>
       
 
 
@@ -164,7 +173,7 @@ As you can see by the graph, it details a nice break down of slots utilization b
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.carrollops.com/blog/2012/08/07/hadoop-fair-scheduler-monitoring/" data-via="jeremy_carroll" data-counturl="http://www.carrollops.com/blog/2012/08/07/hadoop-fair-scheduler-monitoring/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.carrollops.com/blog/2012/08/10/hadoop-fair-scheduler-monitoring-part-2/" data-via="jeremy_carroll" data-counturl="http://www.carrollops.com/blog/2012/08/10/hadoop-fair-scheduler-monitoring-part-2/" >Tweet</a>
   
   
   
@@ -173,10 +182,8 @@ As you can see by the graph, it details a nice break down of slots utilization b
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2012/08/06/open-sourcing-some-work/" title="Previous Post: Open sourcing some work">&laquo; Open sourcing some work</a>
+        <a class="basic-alignment left" href="/blog/2012/08/07/hadoop-fair-scheduler-monitoring/" title="Previous Post: Hadoop Fair Scheduler monitoring">&laquo; Hadoop Fair Scheduler monitoring</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2012/08/10/hadoop-fair-scheduler-monitoring-part-2/" title="Next Post: Hadoop Fair Scheduler Monitoring - Part 2">Hadoop Fair Scheduler Monitoring - Part 2 &raquo;</a>
       
     </p>
   </footer>
@@ -251,8 +258,8 @@ As you can see by the graph, it details a nice break down of slots utilization b
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://www.carrollops.com/blog/2012/08/07/hadoop-fair-scheduler-monitoring/';
-        var disqus_url = 'http://www.carrollops.com/blog/2012/08/07/hadoop-fair-scheduler-monitoring/';
+        var disqus_identifier = 'http://www.carrollops.com/blog/2012/08/10/hadoop-fair-scheduler-monitoring-part-2/';
+        var disqus_url = 'http://www.carrollops.com/blog/2012/08/10/hadoop-fair-scheduler-monitoring-part-2/';
         var disqus_script = 'embed.js';
       
     (function () {

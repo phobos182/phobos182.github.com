@@ -9,7 +9,7 @@
   <meta name="author" content="Jeremy Carroll">
 
   
-  <meta name="description" content="So today I received a request to help debug fair scheduler performance on one of our large Hadoop clusters. Normally this is the point where I would &hellip;">
+  <meta name="description" content="In my first blog post I went over setting up a simple fair scheduler monitoring script using mechanize to scrape stats from the JobTracker page. Now &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -84,6 +84,74 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2012/08/10/hadoop-fair-scheduler-monitoring-part-2/">Hadoop Fair Scheduler Monitoring - Part 2</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-10T08:44:00-07:00" pubdate data-updated="true">Aug 10<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In my first blog post I went over setting up a simple fair scheduler monitoring script using mechanize to scrape stats from the JobTracker page. Now that all the metrics are in our graphite system (In this case, I used graphite due to nice front-end vis) I wanted to show how we can put these metrics to work.</p>
+
+<p>The goal was to measure requests for resources (Map slots / Reduce slots) for different job queues. I can then determine certain parts of the day where there is a lot of contention for resources to see if a job can be rescheduled to a different time when there is more slots available. Another option would be to change the fair-scheduler minShare, preemption, and weight settings to help shape the SLA of running jobs. Before we can start setting these policies it would be nice to know map / reduce slot demand over a timeline. Also look at &#8216;running&#8217; map / reduce slots to see what resources the scheduler gave during those time periods. Here are some questions the metrics can answer for us.</p>
+
+<ul>
+<li>During what times of the day is the cluster heavily over-subscribed?
+
+<ul>
+<li>Is the cluster using more map or reduce slots during these timeframes?</li>
+</ul>
+</li>
+<li>What queues / users are requesting resources?
+
+<ul>
+<li>How many jobs are they running?</li>
+<li>How many Map / Reduce slots are they requesting?</li>
+<li>How fast are they completing map / reduce slots?</li>
+</ul>
+</li>
+</ul>
+
+
+<p>I put together a series of visualizations to help debug an oversubscribed Hadoop cluster. Using this information was invaluable in determining winners and losers of cluster resources. It did not help debug individual MapReduce jobs. You would have to look at individual job performance such as spilling to disk, not using a combiner or secondary sort, or sending too much data uncompressed over the wire, etc&#8230; But it does help determine overall cluster utilization.</p>
+
+<p><img class="left" src="http://www.carrollops.com/images/fair_sched_2_demand.png" width="351" height="140" title="'Demand' #2" >
+<img class="left" src="http://www.carrollops.com/images/fair_sched_2_jobs.png" width="351" height="140" title="'Jobs' #2" >
+<img class="left" src="http://www.carrollops.com/images/fair_sched_2_map_slots.png" width="351" height="140" title="'Map Slots' #2" >
+<img class="left" src="http://www.carrollops.com/images/fair_sched_2_maps_speed.png" width="351" height="140" title="'Map Speed' #2" >
+<img class="left" src="http://www.carrollops.com/images/fair_sched_2_queue.png" width="351" height="140" title="'Queue' #2" >
+<img class="left" src="http://www.carrollops.com/images/fair_sched_2_reduce_slots.png" width="351" height="140" title="'Reduce Slots' #2" >
+<img class="left" src="http://www.carrollops.com/images/fair_sched_2_queue_info.png" width="351" height="140" title="'Queue Info' #2" ></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -210,6 +278,10 @@ As you can see by the graph, it details a nice break down of slots utilization b
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/08/10/hadoop-fair-scheduler-monitoring-part-2/">Hadoop Fair Scheduler Monitoring - Part 2</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2012/08/07/hadoop-fair-scheduler-monitoring/">Hadoop Fair Scheduler monitoring</a>
