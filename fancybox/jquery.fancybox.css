@@ -41,6 +41,11 @@
 	outline: none;
 }
 
+.fancybox-a {
+	margin: 3px;
+	float: left;
+}
+
 .fancybox-inner {
 	overflow: hidden;
 }
