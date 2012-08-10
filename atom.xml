@@ -4,7 +4,7 @@
   <title><![CDATA[CarrollOps]]></title>
   <link href="http://www.carrollops.com/atom.xml" rel="self"/>
   <link href="http://www.carrollops.com/"/>
-  <updated>2012-08-10T09:15:20-07:00</updated>
+  <updated>2012-08-10T11:20:45-07:00</updated>
   <id>http://www.carrollops.com/</id>
   <author>
     <name><![CDATA[Jeremy Carroll]]></name>
@@ -42,13 +42,13 @@
 
 <p>I put together a series of visualizations to help debug an oversubscribed Hadoop cluster. Using this information was invaluable in determining winners and losers of cluster resources. It did not help debug individual MapReduce jobs. You would have to look at individual job performance such as spilling to disk, not using a combiner or secondary sort, or sending too much data uncompressed over the wire, etc&#8230; But it does help determine overall cluster utilization.</p>
 
-<p><img class="left" src="http://www.carrollops.com/images/fair_sched_2_demand.png" width="351" height="140" title="'Demand' #2" >
-<img class="left" src="http://www.carrollops.com/images/fair_sched_2_jobs.png" width="351" height="140" title="'Jobs' #2" >
-<img class="left" src="http://www.carrollops.com/images/fair_sched_2_map_slots.png" width="351" height="140" title="'Map Slots' #2" >
-<img class="left" src="http://www.carrollops.com/images/fair_sched_2_maps_speed.png" width="351" height="140" title="'Map Speed' #2" >
-<img class="left" src="http://www.carrollops.com/images/fair_sched_2_queue.png" width="351" height="140" title="'Queue' #2" >
-<img class="left" src="http://www.carrollops.com/images/fair_sched_2_reduce_slots.png" width="351" height="140" title="'Reduce Slots' #2" >
-<img class="left" src="http://www.carrollops.com/images/fair_sched_2_queue_info.png" width="351" height="140" title="'Queue Info' #2" ></p>
+<p><a href="http://www.carrollops.com/images/fair_sched_2_demand.png" class="fancybox" title="Demand "><img src="http://www.carrollops.com/images/fair_sched_2_demand_m.png" alt="Demand " /></a>
+<a href="http://www.carrollops.com/images/fair_sched_2_jobs.png" class="fancybox" title="Jobs "><img src="http://www.carrollops.com/images/fair_sched_2_jobs_m.png" alt="Jobs " /></a>
+<a href="http://www.carrollops.com/images/fair_sched_2_map_slots.png" class="fancybox" title="Map Slots "><img src="http://www.carrollops.com/images/fair_sched_2_map_slots_m.png" alt="Map Slots " /></a>
+<a href="http://www.carrollops.com/images/fair_sched_2_maps_speed.png" class="fancybox" title="Map Speed "><img src="http://www.carrollops.com/images/fair_sched_2_maps_speed_m.png" alt="Map Speed " /></a>
+<a href="http://www.carrollops.com/images/fair_sched_2_queue.png" class="fancybox" title="Queue "><img src="http://www.carrollops.com/images/fair_sched_2_queue_m.png" alt="Queue " /></a>
+<a href="http://www.carrollops.com/images/fair_sched_2_reduce_slots.png" class="fancybox" title="Reduce Slots "><img src="http://www.carrollops.com/images/fair_sched_2_reduce_slots_m.png" alt="Reduce Slots " /></a>
+<a href="http://www.carrollops.com/images/fair_sched_2_queue_info.png" class="fancybox" title="Queue Info "><img src="http://www.carrollops.com/images/fair_sched_2_queue_info_m.png" alt="Queue Info " /></a></p>
 ]]></content>
   </entry>
   
