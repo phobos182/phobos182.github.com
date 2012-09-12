@@ -245,12 +245,11 @@ gpgcheck=0
 
 <p>We now have a configured repository inside of S3 with our RPM packages. We have setup a role to use in launching new EC2 instances. We have granted this role rights via IAM to getObjects inside of our Yum S3 bucket repository. Finally we have installed the yum plugin on the AMI instance which will look up the temporary access keys to use to fetch data from our S3 bucket like a private yum repository. It&#8217;s pretty easy to test if this is working or not. Run something like this to verify.</p>
 
-<p><code>yum clean all</code>
-<code>yum search &lt;package which only exists in my custom repo&gt;</code>
+<p><code>yum clean all</code><br>
+<code>yum search &lt;package which only exists in my custom repo&gt;</code><br>
 <code>yum install -y &lt;package which only exists in my custom repo&gt;</code></p>
 
-<pre><code>Success will rain down upon you as you have created a scalable package serving infrastructure for all of your AMI's in any availability zone. Comments / suggestions are welcome.
-</code></pre>
+<p>Success will rain down upon you as you have created a scalable package serving infrastructure for all of your AMI&#8217;s in any availability zone. Comments / suggestions are welcome.</p>
 </div>
   
   
