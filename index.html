@@ -173,7 +173,7 @@
 
 <h3>IAM Role</h3>
 
-<p>Inside of the IAM console, choose &#8216;create role&#8217;. Give the name of the role (such as s3yum_access). When it comes time to create a policy, select &#8216;custom policy&#8217;. Use the policy I have defined below. It allows the account the ability to list all S3 buckets and only get from the base bucket, and all sub S3 buckets for our custom yum repository. This may not be the most restrictive policy, but it has worked for me.</p>
+<p>Inside of the IAM console, choose &#8216;create role&#8217;. Give the name of the role (such as s3yum_access). When it comes time to create a policy, select &#8216;custom policy&#8217;. Use the policy I have defined below. It allows the account the ability to list all S3 buckets and only get from the base bucket, and all sub S3 buckets for our custom yum repository. This may not be the most restrictive policy, but it has worked for me. Please replace <strong>bucket-name</strong> with the name of your S3 bucket.</p>
 
 <pre><code>{
   "Statement": [
@@ -192,7 +192,7 @@
       ],
       "Effect": "Allow",
       "Resource": [
-        "arn:aws:s3:::&lt;bucket-name&gt;"
+        "arn:aws:s3:::bucket-name"
       ]
     },
     {
@@ -201,7 +201,7 @@
       ],
       "Effect": "Allow",
       "Resource": [
-        "arn:aws:s3:::&lt;bucket-name&gt;/*"
+        "arn:aws:s3:::bucket-name/*"
       ]
     }
   ]
@@ -210,7 +210,7 @@
 
 <h3>Creating a Yum repository</h3>
 
-<p>I currently use the s3cmd tools package. It allows you to sync local files to s3 pretty easily. Create a local repository structure like your normally would, and then sync it to your S3 bucket. Lots of documentation on how to use createrepo on a directory to create a yum repository. After issuing the createrepo command it will create the filelists / repomd.xml for it to be a working yum repo. Then sync these directories to S3 however you wish. I currently use the S3 tools <a href="http://s3tools.org/s3cmd">http://s3tools.org/s3cmd</a> packages to rsync local files to S3.</p>
+<p>I currently use the s3cmd tools package. It allows you to sync local files to s3 pretty easily. Create a local repository structure like your normally would, and then sync it to your S3 bucket. If you do not know how to create a yum repository, there is a lot of documentation on google to help you out. The jist of it is to copy your RPM files into a directory, and then run createrepo on it. After issuing the createrepo command it will create the filelists / repomd.xml for it to be a working yum repo. Then sync these directories to S3 however you wish. I currently use the S3 tools <a href="http://s3tools.org/s3cmd">http://s3tools.org/s3cmd</a> packages to rsync local files to S3.</p>
 
 <p>Sample Directory layout</p>
 
@@ -218,29 +218,15 @@
   noarch/cloud-init-0.6.3-0.5.bzr532.el6.noarch.rpm
   noarch/s3-yum-0.1.0-1.noarch.rpm
   noarch/python-boto-2.5.2-1.noarch.rpm
-  noarch/repodata
-    noarch/repodata/5f0acd67c9bc60ea0be21fdacb16be80e8ca457384e5737c571aefedc5067c2b-filelists.sqlite.bz2
-    noarch/repodata/aa95a5f299c90f446d14c531f5bdb52cf33fbc179acbe3f8b585bef31ae25857-other.sqlite.bz2
-    noarch/repodata/470659fb003920e662d31f169b9cd39395627f7b2e8adf5b88097ce31308c487-primary.xml.gz
-    noarch/repodata/e753b0e04be0efb7ee66598843551256ab42c01f31367b2a13cebd6f75f99c5e-primary.sqlite.bz2
-    noarch/repodata/6d261f3d671c78a79d00232e9ea0b15d43f99313d973d02682583ea874171843-filelists.xml.gz
-    noarch/repodata/repomd.xml
-    noarch/repodata/1c0b490badacbf9d3c359697cfac6c31ea4242105aa546dc4d0fb63f4f5c0e38-other.xml.gz
 x86_64
-  x86_64/repodata
   x86_64/python-PyYAML-3.10-1.x86_64.rpm
-    x86_64/repodata/6c81a677d8cfda94cecbb56a1c87d25a0882593362c52845dfa37cab422045dd-primary.sqlite.bz2
-    x86_64/repodata/13d755e954bd8dff601ccaaa33306e1a37364855e41c3c43034675a58b6eccd5-filelists.sqlite.bz2
-    x86_64/repodata/4786ffd783b6d7bcc1ffdecf8c4a5cb8f0f87d74566e82d942207c6a99d916ef-other.sqlite.bz2
-    x86_64/repodata/3c1b1f0cfed050041d3640099e2d98482282e479834970faeddb6378a63ff880-primary.xml.gz
-    x86_64/repodata/ecbc6b5b74202b381b914a6098bb79dc8f2086eaacf3c6932e3f670d5e2d976f-filelists.xml.gz
-    x86_64/repodata/e4957602bf8a93f4b2d7561b4694100bb0c97a0f601d90ee54169cec6053cab4-other.xml.gz
-    x86_64/repodata/repomd.xml
 </code></pre>
 
 <p>S3 tools sync</p>
 
-<pre><code>s3cmd sync . s3://&lt;my-bucket-name&gt;/
+<pre><code>createrepo noarch
+createrepo x86_64
+s3cmd sync . s3://bucket-name/
 </code></pre>
 
 <h3>Configuring Yum repository</h3>
@@ -249,7 +235,7 @@ x86_64
 
 <pre><code>[s3-noarch]
 name=S3-noarch
-baseurl=http://my-bucket-name.s3.amazonaws.com/noarch
+baseurl=http://bucket-name.s3.amazonaws.com/noarch
 enabled=1
 s3_enabled=1
 gpgcheck=0
