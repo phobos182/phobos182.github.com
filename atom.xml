@@ -4,7 +4,7 @@
   <title><![CDATA[CarrollOps]]></title>
   <link href="http://www.carrollops.com/atom.xml" rel="self"/>
   <link href="http://www.carrollops.com/"/>
-  <updated>2012-09-11T23:38:05-07:00</updated>
+  <updated>2012-09-11T23:48:26-07:00</updated>
   <id>http://www.carrollops.com/</id>
   <author>
     <name><![CDATA[Jeremy Carroll]]></name>
@@ -81,7 +81,7 @@
 
 <h3>Creating a Yum repository</h3>
 
-<p>I currently use the s3cmd tools package. It allows you to sync local files to s3 pretty easily. Create a local repository structure like your normally would, and then sync it to your S3 bucket. If you do not know how to create a yum repository, there is a lot of documentation on google to help you out. The jist of it is to copy your RPM files into a directory, and then run createrepo on it. After issuing the createrepo command it will create the filelists / repomd.xml for it to be a working yum repo. Then sync these directories to S3 however you wish. I currently use the S3 tools <a href="http://s3tools.org/s3cmd">http://s3tools.org/s3cmd</a> packages to rsync local files to S3.</p>
+<p>I currently use the S3 tools <a href="http://s3tools.org/s3cmd">http://s3tools.org/s3cmd</a> packages to rsync local files to S3. Create a local repository structure like your normally would, and then sync it to your S3 bucket. If you do not know how to create a yum repository, there is a lot of documentation on google to help you out. The jist of it is to copy your RPM files into a directory, and then run createrepo on it. After issuing the createrepo command it will create the filelists / repomd.xml for it to be a working yum repo. Then sync these directories to S3 however you wish.</p>
 
 <p>Sample Directory layout</p>
 
