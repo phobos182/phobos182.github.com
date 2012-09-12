@@ -9,7 +9,7 @@
   <meta name="author" content="Jeremy Carroll">
 
   
-  <meta name="description" content="GitHub: https://github.com/phobos182/yum-s3-iam When I first investigated moving infrastructure to the cloud, I had a need for software repositories &hellip;">
+  <meta name="description" content="I wanted to get away from some of the Big Data posts I have been doing, and focus on the cloud. When I first investigated moving infrastructure to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -144,15 +144,13 @@
   </header>
 
 
-<div class="entry-content"><p>GitHub: <a href="https://github.com/phobos182/yum-s3-iam">https://github.com/phobos182/yum-s3-iam</a></p>
+<div class="entry-content"><p>I wanted to get away from some of the Big Data posts I have been doing, and focus on the cloud. When I first investigated moving infrastructure to the cloud, I had a need for software repositories that my instances could download packages from. I currently use CentOS 6.x as the OS for AMI images on EC2. I created the smallest instance I could just to configure an apache server to deliver yum repositories. I then had to manage the security groups, availability, and scalability of the web service. It works, but I wished there were most hands-off alternatives.</p>
 
-<p>When I first investigated moving infrastructure to the cloud, I had a need for software repositories that my instances could download packages from. I created the smallest instance I could just to configure an apache server to deliver yum repositories. I then had to manage the security groups, availability, and scalability of the web service. It works, but I wished there were most hands-off alternatives.</p>
+<p>About 7 months ago I came upon a yum plugin <a href="https://github.com/jbraeuer/yum-s3-plugin">https://github.com/jbraeuer/yum-s3-plugin</a> that would allow me to use an S3 bucket as a yum repository. It&#8217;s a fantastic idea as S3 spans all US regions, I don&#8217;t have to pay for a 24/7 instance running, and it&#8217;s scalable. I&#8217;ve used this plugin to great success, but there is one minor inconvenience. For the plugin to work you must configure an access_key + secret_key to the instances you create. I took the approach which I felt was the best compromise between security and ease of use. I created user accounts with Identify and Access Management (IAM) which had very restrictive rights (Only to getObject from my yum s3 buckets). I have been recently tasked with setting up additional cloud infrastructure, and went back to GitHub to see if any progress has been made recently with S3 yum plugins. I then discovered a project which does not require access keys to be installed to the instances <a href="https://github.com/seporaitis/yum-s3-iam">https://github.com/seporaitis/yum-s3-iam</a>. Huzzah!</p>
 
-<p>About 7 months ago I came upon a yum plugin <a href="https://github.com/jbraeuer/yum-s3-plugin">https://github.com/jbraeuer/yum-s3-plugin</a> that would allow me to use an S3 bucket as a yum repository. It&#8217;s a fantastic idea as S3 spans all US regions, I don&#8217;t have to pay for a 24/7 instance running, and it&#8217;s scalable. I&#8217;ve used this plugin to great success, but there is one minor inconvenience. For the plugin to work you must configure an access_key + secret_key to the instances you create. I took the approach which I felt was the best compromise between security and easy of use. I created user accounts with Identify and Access Management (IAM) which had very restrictive rights (Only to getObject from my yum s3 buckets). At my new job I have been tasked with setting up additional cloud infrastructure, and went back to GitHub to see if any progress has been made recently with S3 yum plugins when I discovered a project which does not require access keys to be installed to the instances <a href="https://github.com/seporaitis/yum-s3-iam">https://github.com/seporaitis/yum-s3-iam</a>.</p>
+<p>In June, Amazon released a feature where you can assign IAM roles to an instance at creation time <a href="http://aws.typepad.com/aws/2012/06/iam-roles-for-ec2-instances-simplified-secure-access-to-aws-service-apis-from-ec2.html">http://aws.typepad.com/aws/2012/06/iam-roles-for-ec2-instances-simplified-secure-access-to-aws-service-apis-from-ec2.html</a>. These roles with make available additional metadata in the instance which generates a temporary access_key, secret_key, and token which changes every few minutes to use for API requests. In this case it allows us to make requests to S3 without installing any keys or performing key management.</p>
 
-<p>In June, Amazon released a feature where you can assign IAM roles to an instance at creation time <a href="http://aws.typepad.com/aws/2012/06/iam-roles-for-ec2-instances-simplified-secure-access-to-aws-service-apis-from-ec2.html">http://aws.typepad.com/aws/2012/06/iam-roles-for-ec2-instances-simplified-secure-access-to-aws-service-apis-from-ec2.html</a>. These roles with make available additional metadata in the instance which generates an access_key, secret_key, and token (which changes every few minutes) to use for API requests. With this feature the yum-s3-iam plugin can use your role in addition to the access tokens in the ec2 metadata to make requests to S3 on our behalf without installing any keys or performing key management.</p>
-
-<p>I have submitted a Pull Request to the original author to address a bug fix, and add two enhancements to the origin script. I will be assuming at the time of this writing that you are using the version with my PR attached, or it has been incorporated into the main branch.</p>
+<p>I have submitted a Pull Request to the original author to address a bug fix, and add two enhancements to the origin script <a href="https://github.com/seporaitis/yum-s3-iam/pull/4">https://github.com/seporaitis/yum-s3-iam/pull/4</a>. I will be assuming at the time of this writing that you are using the version with my PR attached, or it has been incorporated into the main branch.</p>
 
 <h2>Installation</h2>
 
@@ -172,7 +170,7 @@
 
 <h3>IAM Role</h3>
 
-<p>Inside of the IAM console, choose &#8216;create role&#8217;. Give the name of the role (such as s3yum_access). When it comes time to create a policy, select &#8216;custom policy&#8217;. Use the policy I have defined below. It allows the account the ability to list all S3 buckets and only get from the base bucket, and all sub S3 buckets for our custom yum repository.</p>
+<p>Inside of the IAM console, choose &#8216;create role&#8217;. Give the name of the role (such as s3yum_access). When it comes time to create a policy, select &#8216;custom policy&#8217;. Use the policy I have defined below. It allows the account the ability to list all S3 buckets and only get from the base bucket, and all sub S3 buckets for our custom yum repository. This may not be the most restrictive policy, but it has worked for me.</p>
 
 <pre><code>{
   "Statement": [
@@ -253,6 +251,12 @@ enabled=1
 s3_enabled=1
 gpgcheck=0
 </code></pre>
+
+<h3>Putting it all together</h3>
+
+<p>We now have a configured repository inside of S3 with our RPM packages. We have setup a role to use in launching new EC2 instances. We have granted this role rights via IAM to getObjects inside of our Yum S3 bucket repository. Finally we have installed the yum plugin on the AMI instance which will look up the temporary access keys to use to fetch data from our S3 bucket like a private yum repository. It&#8217;s pretty easy to test if this is working or not. Run a <code>yum clean all</code> for posterity followed by a <code>yum search &lt;package which only exists in my custom repo&gt;</code>. Success will rain down upon you as you have created a scalable package serving infrastructure for all of your AMI&#8217;s in any availability zone.</p>
+
+<p>Comments are welcome.</p>
 </div>
 
 
