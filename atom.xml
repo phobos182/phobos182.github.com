@@ -4,7 +4,7 @@
   <title><![CDATA[CarrollOps]]></title>
   <link href="http://www.carrollops.com/atom.xml" rel="self"/>
   <link href="http://www.carrollops.com/"/>
-  <updated>2012-09-11T23:35:27-07:00</updated>
+  <updated>2012-09-11T23:38:05-07:00</updated>
   <id>http://www.carrollops.com/</id>
   <author>
     <name><![CDATA[Jeremy Carroll]]></name>
@@ -24,7 +24,7 @@
 
 <p>In June, Amazon released a feature where you can assign IAM roles to an instance at creation time <a href="http://aws.typepad.com/aws/2012/06/iam-roles-for-ec2-instances-simplified-secure-access-to-aws-service-apis-from-ec2.html">http://aws.typepad.com/aws/2012/06/iam-roles-for-ec2-instances-simplified-secure-access-to-aws-service-apis-from-ec2.html</a>. These roles with make available additional metadata in the instance which generates a temporary access_key, secret_key, and token which changes every few minutes to use for API requests. In this case it allows us to make requests to S3 without installing any keys or performing key management.</p>
 
-<p>I have submitted a Pull Request to the original author to address a bug fix, and add two enhancements to the origin script <a href="https://github.com/seporaitis/yum-s3-iam/pull/4">https://github.com/seporaitis/yum-s3-iam/pull/4</a>. I will be assuming at the time of this writing that you are using the version with my PR attached, or it has been incorporated into the main branch.</p>
+<p>I have submitted a Pull Request to the original author to address a bug fix, and add two enhancements to the code <a href="https://github.com/seporaitis/yum-s3-iam/pull/4">https://github.com/seporaitis/yum-s3-iam/pull/4</a>. I will be assuming at the time of this writing that you are using the version with my PR attached, or it has been incorporated into the main branch.</p>
 
 <h2>Installation</h2>
 
